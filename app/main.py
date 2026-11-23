@@ -10,12 +10,15 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import db, graph, memory, security
+from . import db, gate, graph, memory, security
 from .config import ADMIN_PASSWORD, GLOBAL_DAILY_RUNS, RETAINER_PKR, ROOT, USER_DAILY_RUNS
 
 db.init()
 app = FastAPI(title="AdForge", docs_url=None, redoc_url=None)
 WEB = ROOT / "web"
+app.add_middleware(gate.SiteGate)
+app.add_api_route("/gate", gate.gate_form, methods=["GET"], include_in_schema=False)
+app.add_api_route("/gate", gate.gate_submit, methods=["POST"], include_in_schema=False)
 app.mount("/static", StaticFiles(directory=WEB / "static"), name="static")
 
 _locks: dict[str, threading.Lock] = defaultdict(threading.Lock)  # one agent run per campaign at a time

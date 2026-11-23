@@ -15,6 +15,8 @@ GRAPH_DB_PATH = DATA_DIR / "graph.db"
 MODEL = os.getenv("ADFORGE_MODEL", "claude-haiku-5-5")
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-secret-change-me")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+# When set, the whole site asks for this password first. Empty = site is open.
+SITE_PASSWORD = os.getenv("SITE_PASSWORD", "")
 
 # Cost guards: the API key has a hard spend limit, and the site is public.
 USER_DAILY_RUNS = int(os.getenv("USER_DAILY_RUNS", "40"))
