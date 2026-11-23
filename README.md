@@ -1,6 +1,6 @@
 # AdForge: an AI ad agency in a box
 
-**Track 2, Agentic AI Hackathon (AI-4016, FAST Islamabad). Group G33:** Fazal Zaman Khan (22i-2362), Saifullah Khan (22i-1334).
+**Track 2, Agentic AI Hackathon (AI-4016, FAST Islamabad). Group G33:** Hamza (22i-2330), Fazal Zaman Khan (22i-2362), Saifullah Khan (22i-1334).
 
 A local business types its product and budget. A team of AI agents plans the strategy, writes two ad variants,
 designs a creative for each, asks the owner to approve the spend, reads the results and writes a better ad.
