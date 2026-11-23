@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdForge agency admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <header class="nav">
+    <a class="logo" href="/"><i></i>AdForge <span class="chip warn">admin</span></a>
+    <div class="actions">
+      <button class="btn ghost small hidden" id="refresh" type="button">Refresh</button>
+      <button class="btn ghost small hidden" id="logout" type="button">Log out</button>
+    </div>
+  </header>
+
+  <main class="section" style="padding-top:10px">
+    <div class="panel glow pad" id="login" style="max-width:420px;margin:60px auto">
+      <span class="label">Agency dashboard</span>
+      <h2 style="margin:8px 0 18px">Admin sign in</h2>
+      <form id="login-form">
+        <label class="field"><span class="label">Admin password</span>
+          <input id="password" type="password" maxlength="200" autocomplete="current-password" required></label>
+        <button class="btn primary" style="width:100%">Open dashboard</button>
+        <p class="error" id="login-error"></p>
+      </form>
+    </div>
+
+    <div id="dash" class="hidden" style="display:flex;flex-direction:column;gap:16px">
+      <div class="grid4" id="totals"></div>
+      <div class="panel pad"><span class="label">Brands</span><div class="scroll" id="brands" style="margin-top:8px"></div></div>
+      <div class="panel pad"><span class="label">Campaigns</span><div class="scroll" id="campaigns" style="margin-top:8px"></div></div>
+      <div class="panel pad"><span class="label">Audit log</span><div class="scroll" id="audit" style="margin-top:8px;max-height:340px"></div></div>
+    </div>
+  </main>
+
+  <script src="/static/bg.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const rs = (value) => "Rs " + Number(value || 0).toLocaleString("en-PK", { maximumFractionDigits: 0 });
+    const when = (ts) => new Date(ts * 1000).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    const stat = (label, value, cls = "grad") => `<div class="panel pad stat"><span class="label">${label}</span><b class="${cls}">${value}</b></div>`;
+
+    async function load() {
+      const token = sessionStorage.getItem("adforge_admin");
+      if (!token) return;
+      const response = await fetch("/api/admin/overview", { headers: { Authorization: "Bearer " + token } });
+      if (!response.ok) { sessionStorage.removeItem("adforge_admin"); return; }
+      const data = await response.json(), t = data.totals;
+      $("login").classList.add("hidden");
+      ["dash", "refresh", "logout"].forEach((id) => $(id).classList.remove("hidden"));
+      $("totals").innerHTML =
+        stat("Brands", t.brands) + stat("Retainer revenue / month", rs(t.mrr)) + stat("Campaigns (live)", `${t.campaigns} (${t.live})`) +
+        stat("Ad spend managed", rs(t.ad_spend)) + stat("Agent runs today", `${t.runs_today} / ${t.run_cap}`) +
+        stat("Requests refused by guard", t.refused, "");
+      $("brands").innerHTML = `<table><thead><tr><th>Brand</th><th>Email</th><th>Campaigns</th><th>Live</th><th>Ad spend</th><th>Conversions</th><th>Joined</th></tr></thead><tbody>` +
+        data.brands.map((b) => `<tr><td><b>${esc(b.business)}</b></td><td>${esc(b.email)}</td><td>${b.campaigns}</td><td>${b.live}</td><td>${rs(b.spend)}</td><td>${b.conversions}</td><td>${when(b.created)}</td></tr>`).join("") +
+        `</tbody></table>`;
+      $("campaigns").innerHTML = `<table><thead><tr><th>Campaign</th><th>Brand</th><th>Status</th><th>Ads</th><th>Budget</th><th>Spend</th><th>Clicks</th><th>Conversions</th></tr></thead><tbody>` +
+        data.campaigns.map((c) => `<tr><td><b>${esc(c.name)}</b></td><td>${esc(c.business)}</td>
+          <td><span class="chip ${c.status === "live" ? "live" : ""}">${esc(c.status)}</span></td><td>${c.ads}</td>
+          <td>${rs(c.daily_budget * c.days)}</td><td>${rs(c.spend)}</td><td>${c.clicks}</td><td>${c.conversions}</td></tr>`).join("") +
+        `</tbody></table>`;
+      $("audit").innerHTML = `<table><thead><tr><th>When</th><th>Brand</th><th>Action</th><th>Detail</th></tr></thead><tbody>` +
+        data.audit.map((a) => `<tr><td>${when(a.created)}</td><td>${esc(a.business)}</td>
+          <td><span class="chip ${a.action === "refused" ? "warn" : a.action === "launch_approved" ? "live" : ""}">${esc(a.action)}</span></td><td>${esc(a.detail)}</td></tr>`).join("") +
+        `</tbody></table>`;
+    }
+
+    $("login-form").onsubmit = async (event) => {
+      event.preventDefault();
+      const response = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: $("password").value }) });
+      const data = await response.json();
+      if (!response.ok) { $("login-error").textContent = data.detail || "Could not sign in."; return; }
+      sessionStorage.setItem("adforge_admin", data.token);
+      load();
+    };
+    $("refresh").onclick = load;
+    $("logout").onclick = () => { sessionStorage.removeItem("adforge_admin"); location.reload(); };
+    load();
+  </script>
+</body>
+</html>

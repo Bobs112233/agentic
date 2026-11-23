@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdForge: your AI ad agency in a box</title>
+  <meta name="description" content="AdForge writes your ads, designs the creatives, A/B tests them and tells you what to fix.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <header class="nav">
+    <a class="logo" href="/"><i></i>AdForge</a>
+    <div class="actions">
+      <span class="chip on"><span class="dot"></span>5 agents online</span>
+      <a class="btn ghost small" href="/admin">Agency admin</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <span class="label">AI ad agency in a box</span>
+        <h1 style="margin-top:14px">Ads that <span class="grad">write, test and fix</span> themselves.</h1>
+        <p class="lead">Tell AdForge your product and budget. A team of AI agents plans the strategy, writes the copy,
+          designs the creatives, runs the A/B test and tells you exactly what to change. You approve every rupee.</p>
+        <div class="stats">
+          <div><b class="grad">60 sec</b><span class="label">brief to finished ads</span></div>
+          <div><b class="grad">A/B</b><span class="label">every campaign tested</span></div>
+          <div><b class="grad">Rs 0</b><span class="label">spent without approval</span></div>
+        </div>
+      </div>
+
+      <div class="panel glow pad" id="auth">
+        <div class="tabs">
+          <button id="tab-signup" class="active" type="button">Create account</button>
+          <button id="tab-login" type="button">Log in</button>
+        </div>
+        <form id="auth-form">
+          <label class="field" id="business-field"><span class="label">Business name</span>
+            <input id="business" maxlength="60" placeholder="Brew Lab, F-7 Islamabad" autocomplete="organization"></label>
+          <label class="field"><span class="label">Email</span>
+            <input id="email" type="email" maxlength="120" placeholder="you@brand.pk" autocomplete="email" required></label>
+          <label class="field"><span class="label">Password</span>
+            <input id="password" type="password" minlength="6" maxlength="120" placeholder="At least 6 characters" autocomplete="current-password" required></label>
+          <button class="btn primary" style="width:100%" id="auth-submit">Start my first campaign</button>
+          <p class="error" id="auth-error"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <span class="label">How it works</span>
+      <h2 style="font-size:32px;margin-top:8px">One brief. Five agents. One approval.</h2>
+      <div class="flow">
+        <div class="panel node"><span class="chip on">01</span><b>Strategist</b><span class="muted">Picks the audience, tone and two angles worth testing.</span></div>
+        <div class="panel node"><span class="chip on">02</span><b>Copywriter</b><span class="muted">Writes A and B: headline, text and call to action.</span></div>
+        <div class="panel node"><span class="chip on">03</span><b>Creative Director</b><span class="muted">Designs a finished square creative for each ad.</span></div>
+        <div class="panel node"><span class="chip warn">04</span><b>Launcher</b><span class="muted">Stops and asks you before any money is spent.</span></div>
+        <div class="panel node"><span class="chip live">05</span><b>Analyst</b><span class="muted">Reads results, names the winner, writes a better ad.</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <span class="label">Pricing</span>
+      <h2 style="font-size:32px;margin-top:8px">A monthly retainer, not an agency bill.</h2>
+      <div class="plans">
+        <div class="panel pad"><span class="label">Starter</span><div class="price">Rs 15,000<span class="muted" style="font-size:15px"> / month</span></div>
+          <span class="muted">Up to 4 campaigns a month, A/B testing, results analysis, brand memory.</span></div>
+        <div class="panel pad glow"><span class="label">Growth</span><div class="price grad">Rs 30,000<span class="muted" style="font-size:15px"> / month</span></div>
+          <span class="muted">Unlimited campaigns, weekly result reports, priority agent runs.</span></div>
+      </div>
+    </section>
+  </main>
+  <footer>AdForge · Group G33 · AI-4016 Agentic AI · results run on a sandbox ad network</footer>
+
+  <script src="/static/bg.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    if (localStorage.getItem("adforge_token")) location.href = "/app";
+    let mode = "signup";
+    function setMode(next) {
+      mode = next;
+      $("tab-signup").classList.toggle("active", mode === "signup");
+      $("tab-login").classList.toggle("active", mode === "login");
+      $("business-field").classList.toggle("hidden", mode === "login");
+      $("auth-submit").textContent = mode === "signup" ? "Start my first campaign" : "Log in";
+      $("auth-error").textContent = "";
+    }
+    $("tab-signup").onclick = () => setMode("signup");
+    $("tab-login").onclick = () => setMode("login");
+    $("auth-form").onsubmit = async (event) => {
+      event.preventDefault();
+      const body = { email: $("email").value.trim(), password: $("password").value };
+      if (mode === "signup") body.business = $("business").value.trim();
+      $("auth-submit").disabled = true;
+      try {
+        const response = await fetch("/api/" + mode, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Check the fields and try again.");
+        localStorage.setItem("adforge_token", data.token);
+        location.href = "/app";
+      } catch (error) {
+        $("auth-error").textContent = error.message;
+      } finally {
+        $("auth-submit").disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>

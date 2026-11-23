@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdForge workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <header class="nav">
+    <a class="logo" href="/app"><i></i>AdForge</a>
+    <div class="actions">
+      <span class="chip on"><span class="dot"></span><span id="business">...</span></span>
+      <button class="btn ghost small" id="logout" type="button">Log out</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="col">
+      <button class="btn primary" id="new-campaign" type="button">+ New campaign</button>
+      <div class="panel pad scroll" style="flex:1">
+        <span class="label">Campaigns</span>
+        <div class="list" id="campaigns" style="margin-top:10px"></div>
+      </div>
+      <div class="panel pad scroll" style="max-height:42%">
+        <span class="label">Brand memory</span>
+        <p class="muted" style="font-size:12px;margin:6px 0 10px">What AdForge remembers across every campaign. Remove anything you want forgotten.</p>
+        <div id="memory"></div>
+      </div>
+    </aside>
+
+    <main class="col scroll" id="center"></main>
+
+    <aside class="col">
+      <div class="panel chat">
+        <div class="pad" style="padding-bottom:10px;border-bottom:1px solid var(--line)">
+          <span class="label">Talk to your ad team</span>
+        </div>
+        <div class="msgs scroll" id="messages"></div>
+        <div class="trace" id="trace"></div>
+        <form class="chat-input" id="chat-form">
+          <input id="chat-text" maxlength="1500" placeholder="Make B more urgent..." autocomplete="off" disabled>
+          <button class="btn primary small" id="chat-send" disabled>Send</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+
+  <div class="overlay hidden" id="working">
+    <div class="working">
+      <div class="orbit"><i></i><i></i><i></i><b></b></div>
+      <h2 id="working-title">Agents at work</h2>
+      <p class="muted" id="working-text"></p>
+      <div class="steps" id="working-steps"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="approval">
+    <div class="panel glow modal">
+      <span class="chip warn"><span class="dot"></span>Human approval required</span>
+      <h2 style="margin-top:14px">Approve this spend?</h2>
+      <div class="spend grad" id="approval-total"></div>
+      <p class="muted" id="approval-text"></p>
+      <p class="muted" style="font-size:12px">Nothing is spent until you approve. This build runs on a sandbox ad network, so no real money moves.</p>
+      <div class="actions" style="margin-top:18px">
+        <button class="btn primary" id="approve" type="button">Approve and launch</button>
+        <button class="btn danger" id="reject" type="button">Cancel launch</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/bg.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
