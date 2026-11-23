@@ -5,7 +5,7 @@
 A local business types its product and budget. A team of AI agents plans the strategy, writes two ad variants,
 designs a creative for each, asks the owner to approve the spend, reads the results and writes a better ad.
 
-- **Live site:** _add the Render link here after deploying_
+- **Live site:** https://adforge-g33.onrender.com (free Render instance: the first visit after a quiet spell can take about a minute to wake up)
 - **Demo GIF:** _add `docs/demo.gif` here_
 
 ## The business
