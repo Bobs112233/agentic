@@ -31,7 +31,9 @@ def is_sensitive(text: str) -> bool:
 
 
 def save_profile(user_id: str, profile: dict) -> None:
-    store.put((user_id, "brand"), "profile", profile)
+    """One profile per product, so a second product does not overwrite what we know about the first."""
+    key = re.sub(r"[^a-z0-9]+", "-", str(profile.get("product", "profile")).lower()).strip("-")[:40] or "profile"
+    store.put((user_id, "brand"), key, profile)
 
 
 def save_preference(user_id: str, text: str) -> bool:

@@ -14,7 +14,7 @@ from .config import SECRET_KEY, SITE_PASSWORD
 
 COOKIE = "adforge_gate"
 MAX_AGE = 7 * 86400
-OPEN_PATHS = ("/gate", "/healthz", "/static/")
+OPEN_PATHS = ("/gate", "/health", "/chat", "/static/")  # "/health" also covers /healthz
 
 
 def _sign(value: str) -> str:

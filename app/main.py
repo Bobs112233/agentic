@@ -10,13 +10,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import db, gate, graph, memory, security
+from . import agent_api, db, gate, graph, memory, security
 from .config import ADMIN_PASSWORD, GLOBAL_DAILY_RUNS, RETAINER_PKR, ROOT, USER_DAILY_RUNS
 
 db.init()
 app = FastAPI(title="AdForge", docs_url=None, redoc_url=None)
 WEB = ROOT / "web"
 app.add_middleware(gate.SiteGate)
+app.include_router(agent_api.router)  # open /health and /chat for the evaluator
 app.add_api_route("/gate", gate.gate_form, methods=["GET"], include_in_schema=False)
 app.add_api_route("/gate", gate.gate_submit, methods=["POST"], include_in_schema=False)
 app.mount("/static", StaticFiles(directory=WEB / "static"), name="static")

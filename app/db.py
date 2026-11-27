@@ -116,6 +116,24 @@ def update_campaign(user_id: str, campaign_id: str, **fields) -> None:
         run(f"UPDATE campaigns SET {key} = ? WHERE id = ? AND user_id = ?", (value, campaign_id, user_id))
 
 
+def set_brief(user_id: str, campaign_id: str, brief: dict) -> None:
+    run("UPDATE campaigns SET name = ?, brief = ?, daily_budget = ?, days = ? WHERE id = ? AND user_id = ?",
+        (brief["product"][:60], json.dumps(brief), brief["daily_budget"], brief["days"], campaign_id, user_id))
+
+
+def ensure_api_user(user_id: str) -> None:
+    """Callers of the open /chat API get their own account row, separate from website accounts."""
+    run("INSERT OR IGNORE INTO users (id, email, business, pw_hash, created) VALUES (?,?,?,?,?)",
+        (user_id, f"{user_id}@api.adforge", "API user", "!", time.time()))
+
+
+def ensure_campaign(user_id: str, campaign_id: str, brief: dict) -> None:
+    run("INSERT OR IGNORE INTO campaigns (id, user_id, name, brief, daily_budget, days, created) "
+        "VALUES (?,?,?,?,?,?,?)",
+        (campaign_id, user_id, brief["product"][:60], json.dumps(brief), brief["daily_budget"], brief["days"],
+         time.time()))
+
+
 # ---------- variants ----------
 def list_variants(user_id: str, campaign_id: str) -> list[dict]:
     found = rows("SELECT * FROM variants WHERE campaign_id = ? AND user_id = ? ORDER BY label",
